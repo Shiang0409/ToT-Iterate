@@ -132,3 +132,37 @@ impossible
 Input: {input}
 Answer: {answer}
 Judge:'''
+
+generator_of_evaluator_prompt = '''Given input, answer, and value, provide three reasons for evaluating the value based on the input and answer.
+Input: 4 5 6 10
+Answer: 4 * 5 = 20 (left: 6 10 20)\n10 - 6 = 4 (left: 4 20)\n4 + 20 = 24 (left: 24)\n
+Value: sure
+Reason: Because the answer can calculate to 24, I think it's very reasonable to consider the value as 'sure'.
+Input: 1 2 4 7
+Answer: 1 + 2 = 3 (left: 3 4 7)\n
+Value: impossible
+Reason: I believe there's a chance for the numbers inside the 'left' portion of the answer to reach 24, so the value shouldn't be 'impossible'.
+Input: {x}
+Answer: {y}
+Value: {eva_y}
+Reason:
+'''
+
+evaluator_of_evaluator_prompt = '''Given the input, answer, and statement, evaluate the plausibility of the statement based on the input and answer, and provide a judgment (true, maybe, or wrong)
+Input: 4 5 6 10
+Answer: 4 * 5 = 20 (left: 6 10 20)\n10 - 6 = 4 (left: 4 20)\n4 + 20 = 24 (left: 24)\n
+Statement: sure\nBecause the answer can calculate to 24, I think it's very reasonable to consider the value as 'sure'.
+Plausibility: true
+Input: 1 2 4 7
+Answer: 1 + 2 = 3 (left: 3 4 7)\n
+Statement: impossible\n
+Plausibility: maybe
+Input: 3 4 4 13
+Answer: 13 + 4 = 7 (left: 4 7 13)\n4 + 7 = 11 (left: 11 13)\n11 + 13 = 24 (left: 24)\n
+Statement: impossible\n
+Plausibility: wrong
+Input: {x}
+Answer: {y}
+Statement: {eva_y}
+Plausibility: 
+'''

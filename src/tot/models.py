@@ -1,6 +1,12 @@
 import os
 import openai
-import backoff 
+import backoff
+from llama_index.llms import LlamaCPP
+from llama_index.prompts.lmformatenforcer_utils import (
+    activate_lm_format_enforcer,
+    build_lm_format_enforcer_function,
+)
+import lmformatenforcer
 
 completion_tokens = prompt_tokens = 0
 
@@ -20,18 +26,18 @@ def completions_with_backoff(**kwargs):
     return openai.ChatCompletion.create(**kwargs)
 
 def gpt(prompt, model="gpt-4", temperature=0.7, max_tokens=1000, n=1, stop=None) -> list:
-    messages = [{"role": "user", "content": prompt}]
-    return chatgpt(messages, model=model, temperature=temperature, max_tokens=max_tokens, n=n, stop=stop)
+    messages = [{"role": "user", "content": prompt}] # 將提示文本封裝成消息
+    return chatgpt(messages, model=model, temperature=temperature, max_tokens=max_tokens, n=n, stop=stop) # 調用 chatgpt 函數生成文本
     
 def chatgpt(messages, model="gpt-4", temperature=0.7, max_tokens=1000, n=1, stop=None) -> list:
-    global completion_tokens, prompt_tokens
+    global completion_tokens, prompt_tokens # 記錄完成的 token 數量
     outputs = []
     while n > 0:
-        cnt = min(n, 20)
+        cnt = min(n, 20) # 最多一次生成 20 個文本
         n -= cnt
-        res = completions_with_backoff(model=model, messages=messages, temperature=temperature, max_tokens=max_tokens, n=cnt, stop=stop)
-        outputs.extend([choice["message"]["content"] for choice in res["choices"]])
-        # log completion tokens
+        res = completions_with_backoff(model=model, messages=messages, temperature=temperature, max_tokens=max_tokens, n=cnt, stop=stop) # 調用 completions_with_backoff 函數生成文本
+        outputs.extend([choice["message"]["content"] for choice in res["choices"]]) # 提取生成的文本並加入到輸出列表中
+        # log completion tokens，記錄完成的 token 數量
         completion_tokens += res["usage"]["completion_tokens"]
         prompt_tokens += res["usage"]["prompt_tokens"]
     return outputs
